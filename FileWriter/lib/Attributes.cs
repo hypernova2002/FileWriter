@@ -6,7 +6,20 @@ using System.Threading.Tasks;
 
 namespace FileWriter.lib
 {
-    class Attributes
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public class FileAttribute : Attribute
     {
+        public string Header;
+        public string Delimiter;
+        public bool IncludeChildren;
+
+        public FileAttribute()
+        {
+        }
+
+        public FileAttribute(string header)
+        {
+            this.Header = header;
+        }
     }
 }

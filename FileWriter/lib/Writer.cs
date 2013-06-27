@@ -26,6 +26,11 @@ namespace FileWriter.lib
             _propertyCache = new Hashtable();
         }
 
+        public static byte[] DownloadBytes<T>(IEnumerable<T> data)
+        {
+            return Encoding.UTF8.GetBytes(Download(data));
+        }
+
         /// <summary>
         /// Turn flat generic enumerables into a byte array representation of a tsv.
         /// Complex types and arrays are currently not supported.
@@ -33,9 +38,14 @@ namespace FileWriter.lib
         /// <typeparam name="T">A parameter of any type</typeparam>
         /// <param name="Data">An enumerable of generic types</param>
         /// <returns>A byte array representation of a tsv</returns>
-        public static byte[] DownloadBytes<T>(IEnumerable<T> Data)
+        public static byte[] DownloadBytes<T>(IEnumerable<T> data, DownloadProcessor processor)
         {
-            return Encoding.UTF8.GetBytes(Download(Data));
+            return Encoding.UTF8.GetBytes(Download(data, processor));
+        }
+
+        public static string Download<T>(IEnumerable<T> data)
+        {
+            return Download<T>(data, new DownloadProcessor());
         }
 
         /// <summary>
@@ -45,21 +55,20 @@ namespace FileWriter.lib
         /// <typeparam name="T">A parameter of any type</typeparam>
         /// <param name="data">An enumerable of generic types</param>
         /// <returns>A string representation of a tsv</returns>
-        public static string Download<T>(IEnumerable<T> data)
+        public static string Download<T>(IEnumerable<T> data, DownloadProcessor processor)
         {
             StringBuilder strdata = new StringBuilder();
 
             Type Ttype = typeof(T);
-            DownloadProcessor FileProcessor = new DownloadProcessor();
             PropertyHelper helper = _propertyCache[Ttype.AssemblyQualifiedName] as PropertyHelper;
 
             if (helper == null)
             {
-                helper = FileProcessor.GeneratePropertyHelper(Ttype);
+                helper = processor.GeneratePropertyHelper(Ttype);
                 _propertyCache[Ttype.AssemblyQualifiedName] = helper;
             }
 
-            return FileProcessor.ProcessObject(data, helper);
+            return processor.ProcessObject(data, helper);
         }
     }
 
